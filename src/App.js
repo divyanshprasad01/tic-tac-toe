@@ -11,6 +11,24 @@ function App() {
     const [cells, setCells] = useState(Array(9).fill(null));
     const [bgColor, setBgColor] = useState(Array(9).fill("bg-slate-200"));
     const [disable, setDisable] = useState(Array(9).fill(false));
+    const [timeLeft, setTimeLeft] = useState(15);
+   
+    useEffect(() => {
+        if(disable.every(cell => cell === true)){
+            return;
+        }
+
+        if (timeLeft <= 0) {
+            setPlayers((prev) => !prev);
+            setDisable(Array(9).fill(true));
+        }
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => (prev>0)? prev - 1 : prev);
+        }, 1000);
+        return () => clearInterval(timer);
+
+    }, [timeLeft, disable]);
+
 
     useEffect(() => {
         if(cells[0] !== null && cells[0] === cells[1] && cells[1] === cells[2]){
@@ -88,6 +106,7 @@ function App() {
             setCells(temp);
         }
         setPlayers(!players);
+        setTimeLeft(15);
     }
 
     const resetGame = () => {
@@ -95,7 +114,10 @@ function App() {
         setBgColor(Array(9).fill("bg-slate-200"));
         setDisable(Array(9).fill(false));
         setPlayers(true);
+        setTimeLeft(15);
     }
+
+  
 
 
   return (
@@ -103,7 +125,7 @@ function App() {
     <div className="justify items-start flex-row h-auto w-auto mt-0 p-0">
       <Header NameOfGame="Tic Tac Toe"/>
       <div className=" justify-center flex h-full w-screen p-0">
-        <Timer seconds={10}/>
+        <Timer timeLeft={timeLeft}/>
         <Board players={players} cells={cells} Gamepad={Gamepad} bgColor={bgColor} disable={disable} />
         <ButtonsPane resetGame={resetGame}/>
       </div>
