@@ -124,6 +124,7 @@ function App() {
     <div className="bg-slate-900 h-screen w-screen p-0 m-0">
     <div className="justify items-start flex-row h-auto w-auto mt-0 p-0">
       <Header NameOfGame="Tic Tac Toe"/>
+      <h2 className='pt-10 pb-20 pr-20 h-16 w-full text-white text-2xl font-bold text-center'>Player: {players ? 'X' : 'O'}</h2>
       <div className=" justify-center flex h-full w-screen p-0">
         <Timer timeLeft={timeLeft}/>
         <Board players={players} cells={cells} Gamepad={Gamepad} bgColor={bgColor} disable={disable} />
