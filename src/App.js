@@ -7,11 +7,13 @@ import Header from './Components/Header';
 
 function App() {
 
+    // Player X === true, Player O === false
     const [players, setPlayers] = useState(true);
     const [cells, setCells] = useState(Array(9).fill(null));
     const [bgColor, setBgColor] = useState(Array(9).fill("bg-slate-200"));
     const [disable, setDisable] = useState(Array(9).fill(false));
     const [timeLeft, setTimeLeft] = useState(15);
+    const [history, setHistory] = useState([]);
    
     useEffect(() => {
         if(disable.every(cell => cell === true)){
@@ -97,6 +99,7 @@ function App() {
         if(cells[index] !== null) return;
 
         const temp = [...cells];
+        const hist = [...history];
 
         if(players){
             temp[index] = 'X';
@@ -105,6 +108,10 @@ function App() {
             temp[index] = 'O';
             setCells(temp);
         }
+
+        hist.push(index);
+        setHistory(hist);
+
         setPlayers(!players);
         setTimeLeft(15);
     }
@@ -115,9 +122,56 @@ function App() {
         setDisable(Array(9).fill(false));
         setPlayers(true);
         setTimeLeft(15);
+        setHistory([]);
     }
 
+    const undo = () => {
+        if(history.length === 0) return;
+        const hist = [...history];
+        const temp = [...cells];
+        const lastMove = hist.pop();
+        temp[lastMove] = null;
+        setCells(temp);
+        setHistory(hist);
+        setPlayers(!players);
+        setTimeLeft(15);
+        setDisable(Array(9).fill(false));
+        setBgColor(Array(9).fill("bg-slate-200"));
+    }
   
+
+    const replay = () => {
+        if(history.length === 0) return;
+
+        const temp = [...history];
+        const cellsTemp = [...cells]
+        setCells(Array(9).fill(null));
+        setBgColor(Array(9).fill("bg-slate-200"));
+        setDisable(Array(9).fill(false));
+        setTimeLeft(15);
+        
+        let playerTemp = true;
+        let i = 0;
+        const interval = setInterval(() => {
+            if(i >= temp.length){
+                clearInterval(interval);
+                return;
+            }
+
+            if(playerTemp){
+                cellsTemp[temp[i]] = 'X';
+                setCells(cellsTemp);
+            }else{
+                cellsTemp[temp[i]] = 'O';
+                setCells(cellsTemp);
+            }
+            playerTemp = !playerTemp;
+
+        i++;
+        }, 1000);
+
+        setTimeLeft(15);
+    }
 
 
   return (
@@ -128,7 +182,7 @@ function App() {
       <div className=" justify-center flex h-full w-screen p-0">
         <Timer timeLeft={timeLeft}/>
         <Board players={players} cells={cells} Gamepad={Gamepad} bgColor={bgColor} disable={disable} />
-        <ButtonsPane resetGame={resetGame}/>
+        <ButtonsPane resetGame={resetGame} undo={undo} replay={replay} />
       </div>
     </div>
     </div>
