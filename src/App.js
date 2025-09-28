@@ -1,3 +1,5 @@
+// This is the topmost parent component of this game for now which holds  all the logical states of the game and passes them as props to child components.
+
 import {useState,useEffect} from 'react';
 import './Css/final.css';
 import Board from './Components/Board';
@@ -13,14 +15,18 @@ function App() {
     const [bgColor, setBgColor] = useState(Array(9).fill("bg-slate-200"));
     const [disable, setDisable] = useState(Array(9).fill(false));
     const [timeLeft, setTimeLeft] = useState(15);
+
+    // It will store the history of moves played in the game.
     const [history, setHistory] = useState([]);
    
+//    useEffect to update timer and stop if the cells are disabled (i.e game over).
     useEffect(() => {
         if(disable.every(cell => cell === true)){
             return;
         }
 
         if (timeLeft <= 0) {
+            // If time runs out player is switched (other player won) and cells are disabled (game over).
             setPlayers((prev) => !prev);
             setDisable(Array(9).fill(true));
         }
@@ -31,7 +37,7 @@ function App() {
 
     }, [timeLeft, disable]);
 
-
+    // useEffect to check for winning conditions after every move (i.e whenever cells state changes).
     useEffect(() => {
         if(cells[0] !== null && cells[0] === cells[1] && cells[1] === cells[2]){
             const temp = [...bgColor];
@@ -95,27 +101,30 @@ function App() {
         }
     }, [cells]);
 
+
+    // Function to handle a player move when a cell is clicked.
+    // It updates the cells state, history state, switches players and resets timer.
     const Gamepad = (index) => {
         if(cells[index] !== null) return;
 
         const temp = [...cells];
         const hist = [...history];
 
-        if(players){
-            temp[index] = 'X';
-            setCells(temp);
-        }else{
-            temp[index] = 'O';
-            setCells(temp);
-        }
-
-        hist.push(index);
+        // update values.
+        temp[index] = players ? 'X' : 'O';
+        hist.push({index: index, player: players ? 'X' : 'O'});
+        // Trying to debug history issue
+        console.log("History after adding something: " + JSON.stringify(hist));
+        // set values.
+        setCells(temp);
         setHistory(hist);
-
-        setPlayers(!players);
+        // Switch players
+        setPlayers(prev => !prev);
+        // Reset timer
         setTimeLeft(15);
     }
 
+    // Function to reset the game to initial state.
     const resetGame = () => {
         setCells(Array(9).fill(null));
         setBgColor(Array(9).fill("bg-slate-200"));
@@ -125,52 +134,66 @@ function App() {
         setHistory([]);
     }
 
+// Function to undo the last move played.
     const undo = () => {
         if(history.length === 0) return;
         const hist = [...history];
         const temp = [...cells];
+        // Remove the last move from history and update cells accordingly.
         const lastMove = hist.pop();
-        temp[lastMove] = null;
+        temp[lastMove.index] = null;
+        // Set values.
         setCells(temp);
         setHistory(hist);
-        setPlayers(!players);
+        // Switch players back.
+        setPlayers(prev => !prev);
         setTimeLeft(15);
         setDisable(Array(9).fill(false));
         setBgColor(Array(9).fill("bg-slate-200"));
     }
   
-
+// Function to replay the game from the start showing each move with a delay.
+// It disables the cells during replay and enables them back after replay is done.
+// It is not working and has bugs, taking lots of time to debug, will fix it later.
     const replay = () => {
         if(history.length === 0) return;
 
-        const temp = [...history];
-        const cellsTemp = [...cells]
-        setCells(Array(9).fill(null));
-        setBgColor(Array(9).fill("bg-slate-200"));
-        setDisable(Array(9).fill(false));
-        setTimeLeft(15);
-        
-        let playerTemp = true;
-        let i = 0;
-        const interval = setInterval(() => {
-            if(i >= temp.length){
-                clearInterval(interval);
-                return;
-            }
+        // const temp = [...history];
 
-            if(playerTemp){
-                cellsTemp[temp[i]] = 'X';
-                setCells(cellsTemp);
-            }else{
-                cellsTemp[temp[i]] = 'O';
-                setCells(cellsTemp);
-            }
-            playerTemp = !playerTemp;
+        // console.log("history just before replay: " + temp);
 
-        i++;
-        }, 1000);
+        // setCells(Array(9).fill(null));
+        // setBgColor(Array(9).fill("bg-slate-200"));
+        // setDisable(Array(9).fill(true));
+        // let i = 0;
 
-        setTimeLeft(15);
+        //   setCells((prevCells) => {
+        //     const newCells = [...prevCells];
+        //     newCells[temp[0].index] = temp[0].player;
+        //     return newCells;
+        //     });
+        // i++;
+
+        // const interval = setInterval(() => {
+        //     console.log("Inside Interval");
+
+        //     if(i >= temp.length){
+        //         clearInterval(interval);
+        //         setDisable(Array(9).fill(false));
+        //         return;
+        //     }
+
+        //     setCells((prevCells) => {
+        //         const newCells = [...prevCells];
+        //         newCells[temp[i].index] = temp[i].player;
+        //         return newCells;
+        //     });
+
+        // console.log("value of i: " + i + " played index: " + temp[i].index + " played player: " + temp[i].player);
+
+        // i++;
+        // }, 1000);
+
     }
 
 

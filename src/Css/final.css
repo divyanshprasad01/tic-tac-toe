@@ -459,6 +459,17 @@
     }
   }
 }
+
+@keyframes blink {
+  0%, 50%, 100% { background-color: #000000; }
+  25%, 75% { background-color: #dc2626; } /* red-600 */
+}
+
+.blink {
+  animation: blink 1s infinite;
+}
+
+
 @property --tw-border-style {
   syntax: "*";
   inherits: false;
